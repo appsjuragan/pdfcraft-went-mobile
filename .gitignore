@@ -1,6 +1,10 @@
 *~
 plan/
 /target
+**/target/
+**/target_*/
+local.properties
+**/local.properties
 /dist
 /corpus
 /log

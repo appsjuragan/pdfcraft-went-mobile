@@ -1,0 +1,66 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.flutter-plugins
+.pub-cache/
+.pub/
+build/
+/build/
+coverage/
+/coverage/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android Studio & Gradle
+.gradle/
+**/android/.gradle/
+local.properties
+**/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/app/src/main/jniLibs/
+*.apk
+*.aab
+
+# Rust build artifacts & native binaries
+target/
+target_*/
+**/target/
+**/target_*/
+*.dll
+*.so
+*.dylib
+*.pdb
+*.lib
+*.exp
+*.d
+*.rlib
+
+# Windows desktop ephemeral
+ephemeral/
+**/windows/flutter/ephemeral/
