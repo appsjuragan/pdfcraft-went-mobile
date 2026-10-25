@@ -11,6 +11,7 @@ name = "pdfcraft_mobile"
 
 [dependencies]
 pdfcraft-cos = { path = "../../crates/cos" }
+pdfcraft-crypt = { path = "../../crates/crypt" }
 pdfcraft-create = { path = "../../crates/create" }
 pdfcraft-edit = { path = "../../crates/edit" }
 pdfcraft-sign = { path = "../../crates/sign" }

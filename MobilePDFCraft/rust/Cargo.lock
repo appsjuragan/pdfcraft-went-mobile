@@ -2671,6 +2671,7 @@ dependencies = [
  "pdfcraft-automation",
  "pdfcraft-cos",
  "pdfcraft-create",
+ "pdfcraft-crypt",
  "pdfcraft-edit",
  "pdfcraft-engine",
  "pdfcraft-render",

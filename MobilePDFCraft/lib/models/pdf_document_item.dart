@@ -16,6 +16,7 @@ class PdfDocumentItem {
   bool isWatermarked;
   int currentRotation; // 0, 90, 180, 270
   bool isSample;
+  bool isProtected;
 
   PdfDocumentItem({
     required this.id,
@@ -32,6 +33,7 @@ class PdfDocumentItem {
     this.isWatermarked = false,
     this.currentRotation = 0,
     this.isSample = false,
+    this.isProtected = false,
   });
 
   String get formattedSize {

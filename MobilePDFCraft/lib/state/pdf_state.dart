@@ -374,6 +374,209 @@ class PdfState extends ChangeNotifier {
     }
   }
 
+  // ---- WYSIWYG editing ----
+
+  Future<void> addTextToActive({
+    required String text,
+    double x = 72,
+    double y = 72,
+    double width = 260,
+    String font = 'helvetica',
+    double fontSize = 14,
+    bool bold = false,
+    bool italic = false,
+    Color color = const Color(0xFF000000),
+    String align = 'left',
+  }) async {
+    if (_activeDocument == null) return;
+    _isLoading = true;
+    _statusMessage = 'Adding text...';
+    notifyListeners();
+    try {
+      final newBytes = await _bridge.addText(
+        _activeDocument!.bytes,
+        page1Based: _activePageIndex,
+        x: x,
+        y: y,
+        width: width,
+        text: text,
+        font: font,
+        fontSize: fontSize,
+        bold: bold,
+        italic: italic,
+        color: color,
+        align: align,
+      );
+      _activeDocument!.bytes = newBytes;
+      _activeDocument!.previewPng = await _bridge.renderPagePng(newBytes, page1Based: _activePageIndex);
+      _activeDocument!.fileSizeBytes = newBytes.length;
+      _statusMessage = 'Text added';
+    } catch (e) {
+      _statusMessage = 'Add text failed: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> addImageToActive({required Uint8List imageBytes, double? left, double? bottom, double? right, double? top}) async {
+    if (_activeDocument == null) return;
+    _isLoading = true;
+    _statusMessage = 'Adding image...';
+    notifyListeners();
+    try {
+      final newBytes = await _bridge.addImage(
+        _activeDocument!.bytes,
+        page1Based: _activePageIndex,
+        imageBytes: imageBytes,
+        left: left,
+        bottom: bottom,
+        right: right,
+        top: top,
+      );
+      _activeDocument!.bytes = newBytes;
+      _activeDocument!.previewPng = await _bridge.renderPagePng(newBytes, page1Based: _activePageIndex);
+      _activeDocument!.fileSizeBytes = newBytes.length;
+      _statusMessage = 'Image added';
+    } catch (e) {
+      _statusMessage = 'Add image failed: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> listActiveContent() async {
+    if (_activeDocument == null) return [];
+    try {
+      return await _bridge.listContent(_activeDocument!.bytes);
+    } catch (e) {
+      debugPrint('listContent failed: $e');
+      return [];
+    }
+  }
+
+  Future<void> updateActiveContent({
+    required int page,
+    required int index,
+    String? text,
+    double? x,
+    double? y,
+    double? width,
+    double? height,
+    String? font,
+    double? fontSize,
+    bool? bold,
+    bool? italic,
+    Color? color,
+    String? align,
+  }) async {
+    if (_activeDocument == null) return;
+    _isLoading = true;
+    _statusMessage = 'Updating item...';
+    notifyListeners();
+    try {
+      final newBytes = await _bridge.updateContent(
+        _activeDocument!.bytes,
+        page1Based: page,
+        index: index,
+        text: text,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        font: font,
+        fontSize: fontSize,
+        bold: bold,
+        italic: italic,
+        color: color,
+        align: align,
+      );
+      _activeDocument!.bytes = newBytes;
+      _activeDocument!.previewPng = await _bridge.renderPagePng(newBytes, page1Based: _activePageIndex);
+      _activeDocument!.fileSizeBytes = newBytes.length;
+      _statusMessage = 'Item updated';
+    } catch (e) {
+      _statusMessage = 'Update failed: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteActiveContent({required int page, required int index}) async {
+    if (_activeDocument == null) return;
+    _isLoading = true;
+    _statusMessage = 'Deleting item...';
+    notifyListeners();
+    try {
+      final newBytes = await _bridge.deleteContent(_activeDocument!.bytes, page1Based: page, index: index);
+      _activeDocument!.bytes = newBytes;
+      _activeDocument!.previewPng = await _bridge.renderPagePng(newBytes, page1Based: _activePageIndex);
+      _activeDocument!.fileSizeBytes = newBytes.length;
+      _statusMessage = 'Item deleted';
+    } catch (e) {
+      _statusMessage = 'Delete failed: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> protectActive({
+    String? openPassword,
+    String? ownerPassword,
+    int printingLevel = 2,
+    int changesLevel = 0,
+    bool allowCopy = true,
+  }) async {
+    if (_activeDocument == null) return;
+    if (openPassword == null && ownerPassword == null) return;
+    _isLoading = true;
+    _statusMessage = 'Encrypting with AES-256...';
+    notifyListeners();
+    try {
+      final newBytes = await _bridge.protect(
+        _activeDocument!.bytes,
+        openPassword: openPassword,
+        ownerPassword: ownerPassword,
+        printingLevel: printingLevel,
+        changesLevel: changesLevel,
+        allowCopy: allowCopy,
+      );
+      // Keep the pre-protect preview: encrypted bytes can't render without the password.
+      _activeDocument!.bytes = newBytes;
+      _activeDocument!.isProtected = true;
+      _activeDocument!.fileSizeBytes = newBytes.length;
+      _statusMessage = 'Password protection applied';
+    } catch (e) {
+      _statusMessage = 'Protection failed: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> unprotectActive({String? password}) async {
+    if (_activeDocument == null || !_activeDocument!.isProtected) return;
+    _isLoading = true;
+    _statusMessage = 'Removing protection...';
+    notifyListeners();
+    try {
+      final newBytes = await _bridge.unprotect(_activeDocument!.bytes, password: password);
+      _activeDocument!.bytes = newBytes;
+      _activeDocument!.isProtected = false;
+      _activeDocument!.previewPng = await _bridge.renderPagePng(newBytes, page1Based: _activePageIndex);
+      _activeDocument!.fileSizeBytes = newBytes.length;
+      _statusMessage = 'Protection removed';
+    } catch (e) {
+      _statusMessage = 'Remove protection failed (wrong password?): $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> shareOrExportDocument(PdfDocumentItem item, BuildContext context) async {
     try {
       final tempDir = await getTemporaryDirectory();

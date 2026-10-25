@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../state/pdf_state.dart';
 import '../dialogs/create_dialog.dart';
 import '../theme/facebook_theme.dart';
+import 'editor_view.dart';
 
 class ViewerEditorView extends StatelessWidget {
   final PdfState state;
@@ -80,7 +81,7 @@ class ViewerEditorView extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '${doc.formattedSize} • Page ${state.activePageIndex} of ${doc.pageCount}${doc.isSigned ? " • Digitally Signed" : ""}',
+                      '${doc.formattedSize} • Page ${state.activePageIndex} of ${doc.pageCount}${doc.isSigned ? " • Digitally Signed" : ""}${doc.isProtected ? " • 🔒 Protected" : ""}',
                       style: TextStyle(
                         fontSize: 12,
                         color: doc.isSigned ? const Color(0xFF45BD62) : FacebookTheme.textSecondary,
@@ -221,6 +222,14 @@ class ViewerEditorView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                _buildActionButton(
+                  icon: Icons.edit_rounded,
+                  label: 'Edit',
+                  color: const Color(0xFF0F7B6C),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => EditorView(state: state)),
+                  ),
+                ),
                 _buildActionButton(
                   icon: Icons.water_drop_outlined,
                   label: 'Watermark',
